@@ -95,7 +95,7 @@ CWARNS   := $(COMWARNS) -Wmissing-prototypes -Wmissing-declarations -Wshadow \
 		-Wbad-function-cast
 CXXWARNS := $(COMWARNS) -Wno-non-template-friend -Woverloaded-virtual \
 		-Wcast-qual \
-		-Wcast-align -Wconversion
+		-Wcast-align
 ifeq ($(COMPILER),gnu)
 CXXWARNS += -Weffc++
 endif
