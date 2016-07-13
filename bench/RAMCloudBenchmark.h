@@ -49,11 +49,6 @@ class RAMCloudBench {
       value = strdup(value_str.c_str());
     }
 
-    ~RecordData() {
-      delete[] keys;
-      delete[] value;
-    }
-
     KeyInfo* GetKeys(uint64_t primary_key) {
       keys[0].key = &primary_key;
       return keys;
