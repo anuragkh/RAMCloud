@@ -11,6 +11,9 @@
 *.diff
 .tags*
 
+.cproject
+.project
+
 /install/
 /bindings/java/build/
 /logs/
