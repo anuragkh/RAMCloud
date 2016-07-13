@@ -54,7 +54,8 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes) {
   while (load_data_size < target_data_size) {
     std::string cur_value;
     std::getline(in, cur_value);
-    records.push_back(RecordData(cur_value, num_attributes_));
+    RecordData record(cur_value, num_attributes_);
+    records.push_back(record);
     load_data_size += cur_value.length();
   }
 
@@ -203,7 +204,8 @@ void RAMCloudBench::BenchmarkAppendLatency() {
   for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value;
     std::getline(in, cur_value);
-    records.push_back(RecordData(cur_value, num_attributes_));
+    RecordData record(cur_value, num_attributes_);
+    records.push_back(record);
   }
   int64_t cur_key = init_load_keys_;
 
@@ -319,11 +321,12 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
                 int64_t key = RandomInteger(0, init_load_keys_);
                 in_s >> attr_id >> attr_val;
                 std::getline(in_a, value_str);
-                SearchQuery query = { attr_id, attr_val };
+                SearchQuery query = {attr_id, attr_val};
 
                 keys.push_back(key);
                 queries.push_back(query);
-                records.push_back(RecordData(value_str, num_attributes_));
+                RecordData record(value_str, num_attributes_);
+                records.push_back(record);
 
                 double r = RandomDouble(0, 1);
                 if (r <= get_m) {
