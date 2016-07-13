@@ -156,10 +156,12 @@ void RAMCloudBench::BenchmarkSearchLatency() {
   std::vector<SearchQuery> queries;
 
   std::ifstream in(data_path_ + ".queries");
-  uint8_t attr_id;
-  std::string attr_val;
-  while (queries.size() < kWarmupCount + kMeasureCount
-      && (in >> attr_id >> attr_val)) {
+  int attr_id;
+  std::string attr_val, entry;
+  while (queries.size() < kWarmupCount + kMeasureCount) {
+    std::getline(in, entry);
+    std::stringstream ss(entry);
+    ss >> attr_id >> attr_val;
     SearchQuery query = { attr_id, attr_val };
     queries.push_back(query);
   }
