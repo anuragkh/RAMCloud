@@ -32,11 +32,6 @@ class RAMCloudBench {
   static const uint64_t kThreadQueryCount = 75000;
 
   struct RecordData {
-    RecordData() {
-      keys = NULL;
-      value = NULL;
-    }
-
     RecordData(std::string value_str, uint8_t num_attributes,
                char delim = '|') {
       keys = new KeyInfo[num_attributes + 1];
@@ -45,7 +40,8 @@ class RAMCloudBench {
       uint8_t key_id = 0;
       keys[0] = {NULL, sizeof(uint64_t)};
       while (std::getline(ss, key, delim) && key_id < num_attributes) {
-        KeyInfo elem = { strdup(key.c_str()), 0 };
+        char *keyptr = strdup(key.c_str());
+        KeyInfo elem = { keyptr, 0 };
         keys[key_id + 1] = elem;
         key_id++;
       }
