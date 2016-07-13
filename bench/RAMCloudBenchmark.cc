@@ -320,16 +320,19 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
               std::ifstream in_a(data_path_);
               in_a.seekg(init_load_bytes_);
 
-              uint8_t attr_id;
+              int attr_id;
               std::string attr_val;
               std::string value_str;
               std::vector<uint32_t> query_types;
               LOG(stderr, "Generating queries...\n");
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
                 int64_t key = RandomInteger(0, init_load_keys_);
-                in_s >> attr_id >> attr_val;
-                std::getline(in_a, value_str);
+                std::string entry;
+                std::getline(in_s, entry);
+                std::stringstream ss(entry);
+                ss >> attr_id >> attr_val;
                 SearchQuery query = {attr_id, attr_val};
+                std::getline(in_a, value_str);
 
                 keys.push_back(key);
                 queries.push_back(query);
