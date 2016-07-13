@@ -9,7 +9,6 @@
 //#define QUERY(client, i, num_keys)
 #ifndef QUERY
 #define QUERY(client, i, num_keys) {\
-  std::set<int64_t> search_res;\
   if (query_types[i % kThreadQueryCount] == 0) {\
     client->read(table_id_, &keys[i % keys.size()], 8, &get_res, NULL, NULL);\
     num_keys++;\
@@ -157,7 +156,8 @@ void RAMCloudBench::BenchmarkSearchLatency() {
   std::string attr_val;
   while (queries.size() < kWarmupCount + kMeasureCount
       && (in >> attr_id >> attr_val)) {
-    queries.push_back(SearchQuery(attr_id, attr_val));
+    SearchQuery query = { attr_id, attr_val };
+    queries.push_back(query);
   }
 
   LOG(stderr, "Done.\n");
@@ -319,9 +319,10 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
                 int64_t key = RandomInteger(0, init_load_keys_);
                 in_s >> attr_id >> attr_val;
                 std::getline(in_a, value_str);
+                SearchQuery query = { attr_id, attr_val };
 
                 keys.push_back(key);
-                queries.push_back(SearchQuery(attr_id, attr_val));
+                queries.push_back(query);
                 records.push_back(RecordData(value_str, num_attributes_));
 
                 double r = RandomDouble(0, 1);

@@ -4,8 +4,12 @@
 #include <chrono>
 #include <sys/time.h>
 #include <random>
+#include <fstream>
+#include <sstream>
 
 #include "RamCloud.h"
+#include "IndexKey.h"
+#include "IndexLookup.h"
 
 using namespace RAMCloud;
 using namespace ::std::chrono;
@@ -37,7 +41,7 @@ class RAMCloudBench {
       std::string key;
       uint8_t key_id = 0;
       keys[0] = {NULL, sizeof(uint64_t)};
-      while (std::getline(ss, key, delim) && key_id < num_attributes_) {
+      while (std::getline(ss, key, delim) && key_id < num_attributes) {
         KeyInfo elem = { strdup(key.c_str()), 0 };
         keys[key_id + 1] = elem;
         key_id++;
@@ -99,18 +103,6 @@ class RAMCloudBench {
       uint64_t pKey = *(uint64_t *) (indexLookup.currentObject()->getKey(
           0, &pKeyLen));
       keys.push_back(pKey);
-    }
-  }
-
-  void CreateKeyInfo(std::vector<KeyInfo>& elems, std::string value_str,
-                     char delim) {
-    std::stringstream ss(value_str);
-    std::string item;
-    uint8_t item_id = 0;
-    while (std::getline(ss, item, delim) && item_id < num_attributes_) {
-      KeyInfo elem = { strdup(item.c_str()), 0 };
-      elems.push_back(elem);
-      item_id++;
     }
   }
 
