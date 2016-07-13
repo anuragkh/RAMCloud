@@ -92,7 +92,7 @@ class RAMCloudBench {
 
   void Search(std::vector<uint64_t>& keys, RamCloud* client,
               SearchQuery& query) {
-    IndexKey::IndexKeyRange range(query.attr_id, query.attr_val.c_str(),
+    IndexKey::IndexKeyRange range(query.attr_id + 1, query.attr_val.c_str(),
                                   query.attr_val.length(),
                                   query.attr_val.c_str(),
                                   query.attr_val.length());
