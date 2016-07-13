@@ -25,9 +25,9 @@ class RAMCloudBench {
   static const uint64_t kMeasureCount = 100000;
   static const uint64_t kCooldownCount = 1000;
 
-  static const uint64_t kWarmupTime = 5000000;
-  static const uint64_t kMeasureTime = 10000000;
-  static const uint64_t kCooldownTime = 5000000;
+  static const uint64_t kWarmupTime = 50000000;
+  static const uint64_t kMeasureTime = 100000000;
+  static const uint64_t kCooldownTime = 50000000;
 
   static const uint64_t kThreadQueryCount = 75000;
 
