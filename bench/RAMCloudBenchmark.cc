@@ -122,11 +122,11 @@ void RAMCloudBench::BenchmarkGetLatency() {
 
   std::ofstream result_stream("latency_get");
 
-  Buffer* result;
+  Buffer result;
   // Warmup
   LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
-    client->read(table_id_, &keys[i], 8, result, NULL, NULL);
+    client->read(table_id_, &keys[i], 8, &result, NULL, NULL);
     // shard_->Get(result, keys[i]);
   }
   LOG(stderr, "Warmup complete.\n");
@@ -135,7 +135,7 @@ void RAMCloudBench::BenchmarkGetLatency() {
   LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     auto t0 = high_resolution_clock::now();
-    client->read(table_id_, &keys[i], 8, result, NULL, NULL);
+    client->read(table_id_, &keys[i], 8, &result, NULL, NULL);
     // shard_->Get(result, keys[i]);
     auto t1 = high_resolution_clock::now();
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
