@@ -145,6 +145,7 @@ void RAMCloudBench::BenchmarkGetLatency() {
   }
   LOG(stderr, "Measure complete.\n");
   result_stream.close();
+  delete client;
 }
 
 void RAMCloudBench::BenchmarkSearchLatency() {
@@ -191,6 +192,7 @@ void RAMCloudBench::BenchmarkSearchLatency() {
   }
   LOG(stderr, "Measure complete.\n");
   result_stream.close();
+  delete client;
 }
 
 void RAMCloudBench::BenchmarkAppendLatency() {
@@ -242,6 +244,7 @@ void RAMCloudBench::BenchmarkAppendLatency() {
   }
   LOG(stderr, "Measure complete.\n");
   result_stream.close();
+  delete client;
 }
 
 void RAMCloudBench::BenchmarkDeleteLatency() {
@@ -281,6 +284,7 @@ void RAMCloudBench::BenchmarkDeleteLatency() {
   }
   LOG(stderr, "Measure complete.\n");
   result_stream.close();
+  delete client;
 }
 
 void RAMCloudBench::BenchmarkThroughput(const double get_f,
@@ -397,17 +401,9 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
               ofs.open(output_file, std::ofstream::out | std::ofstream::app);
               ofs << query_thput << "\t" << key_thput << "\n";
               ofs.close();
-
+              delete client;
             })));
   }
-
-#ifdef MEASURE_GAP
-  OPEN_GAP_LOG(get_f, search_f, append_f, delete_f, num_clients);
-  TimeStamp start = GetTimestamp();
-  while (GetTimestamp() - start < kWarmupTime + kMeasureTime + kCooldownTime) {
-    LOG_GAP;
-  }
-#endif
 
   for (auto& th : threads) {
     th.join();
