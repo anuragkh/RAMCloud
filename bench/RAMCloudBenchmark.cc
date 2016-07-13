@@ -75,7 +75,7 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes) {
     client->write(table_id_, num_attributes_ + 1, keys, value, NULL, NULL,
     false);
 
-    init_load_bytes_ += record.GetValue();
+    init_load_bytes_ += strlen(record.GetValue());
     init_load_keys_++;
 
     // Periodically print out statistics

@@ -6,6 +6,9 @@
 #include <random>
 #include <fstream>
 #include <sstream>
+#include <cstring>
+#include <vector>
+#include <string>
 
 #include "RamCloud.h"
 #include "IndexKey.h"
