@@ -49,6 +49,7 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes) {
 
   int64_t cur_key = 0;
 
+  LOG(stderr, "Reading data...\n");
   std::ifstream in(data_path);
   std::vector<RecordData> records;
   while (load_data_size < target_data_size) {
@@ -59,12 +60,13 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes) {
     load_data_size += cur_value.length();
   }
 
-  LOG(stderr, "Loading...\n");
-
+  LOG(stderr, "Deleting previous table...\n");
   RamCloud* client = NewClient();
   client->dropTable("table");
 
+  LOG(stderr, "Creating table...\n");
   table_id_ = client->createTable("table");
+  LOG(stderr, "Creating indexes...\n");
   for (uint32_t i = 1; i < num_attributes_; i++)
     client->createIndex(table_id_, i, 0, 1);
 
@@ -139,7 +141,7 @@ void RAMCloudBench::BenchmarkGetLatency() {
     // shard_->Get(result, keys[i]);
     auto t1 = high_resolution_clock::now();
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
-    result_stream << keys[i] << "\t" << tdiff << "\n";
+    result_stream << result.size() << "\t" << tdiff << "\n";
   }
   LOG(stderr, "Measure complete.\n");
   result_stream.close();
