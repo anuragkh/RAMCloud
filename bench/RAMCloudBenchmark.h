@@ -46,10 +46,10 @@ class RAMCloudBench {
         key_id++;
       }
 
-      fprintf(stderr, "Keys: (");
-      for (size_t i = 0; i < num_attributes; i++)
-        fprintf(stderr, "%s, ", keys[i + 1].key);
-      fprintf(stderr, ") Value: %s\n", value);
+//      fprintf(stderr, "Keys: (");
+//      for (size_t i = 0; i < num_attributes; i++)
+//        fprintf(stderr, "%s, ", keys[i + 1].key);
+//      fprintf(stderr, ") Value: %s\n", value);
 
       value = strdup(value_str.c_str());
     }
