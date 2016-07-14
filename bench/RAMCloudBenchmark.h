@@ -9,6 +9,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include <atomic>
 
 #include "RamCloud.h"
 #include "IndexKey.h"

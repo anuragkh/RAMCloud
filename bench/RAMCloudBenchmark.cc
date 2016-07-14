@@ -306,7 +306,7 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
 
   std::condition_variable cvar;
   std::vector<std::thread> threads;
-  uint64_t cur_key = init_load_keys_;
+  std::atomic<uint64_t> cur_key = init_load_keys_;
 
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(
