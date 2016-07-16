@@ -42,7 +42,7 @@ class RAMCloudBench {
       keys[0] = {NULL, sizeof(uint64_t)};
       while (std::getline(ss, key, delim) && key_id < num_attributes) {
         char *keyptr = strdup(key.c_str());
-        KeyInfo elem = { keyptr, 0 };
+        KeyInfo elem = { keyptr, key.length() };
         keys[key_id + 1] = elem;
         key_id++;
       }
