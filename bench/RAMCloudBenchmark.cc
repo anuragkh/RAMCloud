@@ -320,8 +320,7 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
               std::vector<SearchQuery> queries;
 
               std::ifstream in_s(data_path_ + ".queries");
-              std::ifstream in_a(data_path_);
-              in_a.seekg(init_load_bytes_);
+              std::ifstream in_a(data_path_ + ".inserts");
 
               int attr_id;
               std::string attr_val;
