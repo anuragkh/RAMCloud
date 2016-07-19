@@ -29,10 +29,11 @@
 }
 #endif
 
-RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes) {
+RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes, std::string& hostname) {
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
   data_path_ = resolved_path;
+  hostname_ = hostname;
   num_attributes_ = num_attributes;
 
   /** Load the data
@@ -314,103 +315,104 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(
         std::move(
-            std::thread([&] {
-              std::vector<int64_t> keys;
-              std::vector<RecordData> records;
-              std::vector<SearchQuery> queries;
+            std::thread(
+                [&] {
+                  std::vector<int64_t> keys;
+                  std::vector<RecordData> records;
+                  std::vector<SearchQuery> queries;
 
-              std::ifstream in_s(data_path_ + ".queries");
-              std::ifstream in_a(data_path_ + ".inserts");
+                  std::ifstream in_s(data_path_ + ".queries");
+                  std::ifstream in_a(data_path_ + ".inserts");
 
-              int attr_id;
-              std::string attr_val;
-              std::string value_str;
-              std::vector<uint32_t> query_types;
-              LOG(stderr, "Generating queries...\n");
-              for (int64_t i = 0; i < kThreadQueryCount; i++) {
-                int64_t key = RandomInteger(0, init_load_keys_);
-                std::string entry;
-                if (std::getline(in_s, entry)) {
-                  std::stringstream ss(entry);
-                  ss >> attr_id >> attr_val;
-                  SearchQuery query = {attr_id, attr_val};
-                  queries.push_back(query);
-                }
-                if (std::getline(in_a, value_str)) {
-                  RecordData record(value_str, num_attributes_);
-                  records.push_back(record);
-                }
-                keys.push_back(key);
+                  int attr_id;
+                  std::string attr_val;
+                  std::string value_str;
+                  std::vector<uint32_t> query_types;
+                  LOG(stderr, "Generating queries...\n");
+                  for (int64_t i = 0; i < kThreadQueryCount; i++) {
+                    int64_t key = RandomInteger(0, init_load_keys_);
+                    std::string entry;
+                    if (std::getline(in_s, entry)) {
+                      std::stringstream ss(entry);
+                      ss >> attr_id >> attr_val;
+                      SearchQuery query = {attr_id, attr_val};
+                      queries.push_back(query);
+                    }
+                    if (std::getline(in_a, value_str)) {
+                      RecordData record(value_str, num_attributes_);
+                      records.push_back(record);
+                    }
+                    keys.push_back(key);
 
-                double r = RandomDouble(0, 1);
-                if (r <= get_m) {
-                  query_types.push_back(0);
-                } else if (r <= search_m) {
-                  query_types.push_back(1);
-                } else if (r <= append_m) {
-                  query_types.push_back(2);
-                } else if (r <= delete_m) {
-                  query_types.push_back(3);
-                }
-              }
+                    double r = RandomDouble(0, 1);
+                    if (r <= get_m) {
+                      query_types.push_back(0);
+                    } else if (r <= search_m) {
+                      query_types.push_back(1);
+                    } else if (r <= append_m) {
+                      query_types.push_back(2);
+                    } else if (r <= delete_m) {
+                      query_types.push_back(3);
+                    }
+                  }
 
-              std::shuffle(keys.begin(), keys.end(), PRNG());
-              std::shuffle(queries.begin(), queries.end(), PRNG());
-              std::shuffle(records.begin(), records.end(), PRNG());
-              LOG(stderr, "Done; Loaded %zu keys, %zu queries and %zu records.\n", keys.size(), queries.size(), records.size());
+                  std::shuffle(keys.begin(), keys.end(), PRNG());
+                  std::shuffle(queries.begin(), queries.end(), PRNG());
+                  std::shuffle(records.begin(), records.end(), PRNG());
+                  LOG(stderr, "Done; Loaded %zu keys, %zu queries and %zu records.\n", keys.size(), queries.size(), records.size());
 
-              RamCloud* client = NewClient();
+                  RamCloud* client = NewClient();
 
-              double query_thput = 0;
-              double key_thput = 0;
-              Buffer get_res;
+                  double query_thput = 0;
+                  double key_thput = 0;
+                  Buffer get_res;
 
-              try {
-                // Warmup phase
-                long i = 0;
-                long num_keys = 0;
-                TimeStamp warmup_start = GetTimestamp();
-                while (GetTimestamp() - warmup_start < kWarmupTime) {
-                  QUERY(client, i, num_keys);
-                  i++;
-                }
+                  try {
+                    // Warmup phase
+                    long i = 0;
+                    long num_keys = 0;
+                    TimeStamp warmup_start = GetTimestamp();
+                    while (GetTimestamp() - warmup_start < kWarmupTime) {
+                      QUERY(client, i, num_keys);
+                      i++;
+                    }
 
-                // Measure phase
-                i = 0;
-                num_keys = 0;
-                TimeStamp start = GetTimestamp();
-                while (GetTimestamp() - start < kMeasureTime) {
-                  QUERY(client, i, num_keys);
-                  i++;
-                }
-                TimeStamp end = GetTimestamp();
-                double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                query_thput = ((double) i / totsecs);
-                key_thput = ((double) num_keys / totsecs);
+                    // Measure phase
+                    i = 0;
+                    num_keys = 0;
+                    TimeStamp start = GetTimestamp();
+                    while (GetTimestamp() - start < kMeasureTime) {
+                      QUERY(client, i, num_keys);
+                      i++;
+                    }
+                    TimeStamp end = GetTimestamp();
+                    double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+                    query_thput = ((double) i / totsecs);
+                    key_thput = ((double) num_keys / totsecs);
 
-                // Cooldown phase
-                i = 0;
-                num_keys = 0;
-                TimeStamp cooldown_start = GetTimestamp();
-                while (GetTimestamp() - cooldown_start < kCooldownTime) {
-                  QUERY(client, i, num_keys);
-                  i++;
-                }
+                    // Cooldown phase
+                    i = 0;
+                    num_keys = 0;
+                    TimeStamp cooldown_start = GetTimestamp();
+                    while (GetTimestamp() - cooldown_start < kCooldownTime) {
+                      QUERY(client, i, num_keys);
+                      i++;
+                    }
 
-              } catch (std::exception &e) {
-                LOG(stderr, "Throughput thread ended prematurely.\n");
-              }
+                  } catch (std::exception &e) {
+                    LOG(stderr, "Throughput thread ended prematurely.\n");
+                  }
 
-              LOG(stderr, "Throughput: %lf\n", query_thput);
+                  LOG(stderr, "Throughput: %lf\n", query_thput);
 
-              std::ofstream ofs;
-              char output_file[100];
-              sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, delete_f, num_clients);
-              ofs.open(output_file, std::ofstream::out | std::ofstream::app);
-              ofs << query_thput << "\t" << key_thput << "\n";
-              ofs.close();
-              delete client;
-            })));
+                  std::ofstream ofs;
+                  char output_file[100];
+                  sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, delete_f, num_clients);
+                  ofs.open(output_file, std::ofstream::out | std::ofstream::app);
+                  ofs << query_thput << "\t" << key_thput << "\n";
+                  ofs.close();
+                  delete client;
+                })));
   }
 
   for (auto& th : threads) {
@@ -441,16 +443,16 @@ std::vector<std::string> Split(const std::string &s, char delim) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 2 || argc > 8) {
+  if (argc < 2 || argc > 10) {
     PrintUsage(argv[0]);
     return -1;
   }
 
   int c;
-  std::string bench_type = "latency-get";
+  std::string bench_type = "latency-get", hostname = "localhost";
   int num_clients = 1;
   uint8_t num_attributes = 1;
-  while ((c = getopt(argc, argv, "b:n:a:")) != -1) {
+  while ((c = getopt(argc, argv, "b:n:a:h:")) != -1) {
     switch (c) {
       case 'b':
         bench_type = std::string(optarg);
@@ -460,6 +462,9 @@ int main(int argc, char** argv) {
         break;
       case 'n':
         num_clients = atoi(optarg);
+        break;
+      case 'h':
+        hostname = std::string(optarg);
         break;
       default:
         LOG(stderr, "Could not parse command line arguments.\n");
@@ -473,7 +478,7 @@ int main(int argc, char** argv) {
 
   std::string data_path = std::string(argv[optind]);
 
-  RAMCloudBench bench(data_path, num_attributes);
+  RAMCloudBench bench(data_path, num_attributes, hostname);
   if (bench_type == "latency-get") {
     bench.BenchmarkGetLatency();
   } else if (bench_type == "latency-search") {

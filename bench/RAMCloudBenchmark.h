@@ -48,11 +48,6 @@ class RAMCloudBench {
       }
 
       value = strdup(value_str.c_str());
-
-//      fprintf(stderr, "Keys: (");
-//      for (size_t i = 0; i < num_attributes; i++)
-//        fprintf(stderr, "%s, ", keys[i + 1].key);
-//      fprintf(stderr, ") Value: %s\n", value);
     }
 
     KeyInfo* GetKeys(uint64_t primary_key) {
@@ -74,7 +69,7 @@ class RAMCloudBench {
     std::string attr_val;
   };
 
-  RAMCloudBench(std::string& data_path, uint32_t num_attributes);
+  RAMCloudBench(std::string& data_path, uint32_t num_attributes, std::string& hostname);
 
   // Latency benchmarks
   void BenchmarkGetLatency();
@@ -88,6 +83,8 @@ class RAMCloudBench {
                            const uint32_t num_clients = 1);
 
   RamCloud* NewClient() {
+    char connector[256];
+    sprintf(connector, "tcp:host=%s,port=11211", hostname_.c_str());
     return new RamCloud("tcp:host=0.0.0.0,port=11211", "main");
   }
 
@@ -141,6 +138,7 @@ class RAMCloudBench {
   }
 
   std::string data_path_;
+  std::string hostname_;
   uint8_t num_attributes_;
   uint64_t init_load_bytes_;
   uint64_t init_load_keys_;
