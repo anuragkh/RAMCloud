@@ -158,13 +158,16 @@ void RAMCloudBench::BenchmarkSearchLatency() {
   std::ifstream in(data_path_ + ".queries");
   int attr_id;
   std::string attr_val, entry;
-  while (queries.size() < kWarmupCount + kMeasureCount) {
-    std::getline(in, entry);
+  while (queries.size() < kWarmupCount + kMeasureCount
+      && std::getline(in, entry)) {
     std::stringstream ss(entry);
     ss >> attr_id >> attr_val;
     SearchQuery query = { attr_id, attr_val };
     queries.push_back(query);
   }
+
+  size_t warmup_count = queries.size() / 10;
+  size_t measure_count = queries.size() - warmup_count;
 
   LOG(stderr, "Done.\n");
 
@@ -172,7 +175,7 @@ void RAMCloudBench::BenchmarkSearchLatency() {
 
   // Warmup
   LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
-  for (uint64_t i = 0; i < kWarmupCount; i++) {
+  for (uint64_t i = 0; i < warmup_count; i++) {
     SearchQuery& query = queries[i % queries.size()];
     std::vector<uint64_t> results;
     Search(results, client, query);
@@ -182,7 +185,7 @@ void RAMCloudBench::BenchmarkSearchLatency() {
 
   // Measure
   LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
-  for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
+  for (uint64_t i = warmup_count; i < warmup_count + measure_count; i++) {
     SearchQuery& query = queries[i % queries.size()];
     std::vector<uint64_t> results;
     auto t0 = high_resolution_clock::now();
@@ -329,16 +332,17 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
                 int64_t key = RandomInteger(0, init_load_keys_);
                 std::string entry;
-                std::getline(in_s, entry);
-                std::stringstream ss(entry);
-                ss >> attr_id >> attr_val;
-                SearchQuery query = {attr_id, attr_val};
-                std::getline(in_a, value_str);
-
+                if (std::getline(in_s, entry)) {
+                  std::stringstream ss(entry);
+                  ss >> attr_id >> attr_val;
+                  SearchQuery query = {attr_id, attr_val};
+                  queries.push_back(query);
+                }
+                if (std::getline(in_a, value_str)) {
+                  RecordData record(value_str, num_attributes_);
+                  records.push_back(record);
+                }
                 keys.push_back(key);
-                queries.push_back(query);
-                RecordData record(value_str, num_attributes_);
-                records.push_back(record);
 
                 double r = RandomDouble(0, 1);
                 if (r <= get_m) {
