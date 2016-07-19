@@ -1,7 +1,8 @@
+sbin="`dirname "$0"`"
+sbin="`cd "$sbin"; pwd`"
+
 echo "Starting coordinator..."
-bash start-coordinator.sh
+$sbin/start-coordinator.sh
 sleep 5
 echo "Starting server..."
-bash start-server.sh
-sleep 5
-echo "Done"
+$sbin/start-server.sh
