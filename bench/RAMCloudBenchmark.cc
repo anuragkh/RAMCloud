@@ -208,11 +208,10 @@ void RAMCloudBench::BenchmarkAppendLatency() {
   LOG(stderr, "Generating queries...");
   std::vector<RecordData> records;
 
-  std::ifstream in(data_path_);
-  in.seekg(init_load_bytes_);
-  for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
-    std::string cur_value;
-    std::getline(in, cur_value);
+  std::ifstream in(data_path_ + ".inserts");
+  std::string cur_value;
+  for (int64_t i = 0;
+      i < kWarmupCount + kMeasureCount && std::getline(in, cur_value); i++) {
     RecordData record(cur_value, num_attributes_);
     records.push_back(record);
   }
