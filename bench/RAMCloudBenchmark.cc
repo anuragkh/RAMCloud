@@ -357,7 +357,7 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
               std::shuffle(keys.begin(), keys.end(), PRNG());
               std::shuffle(queries.begin(), queries.end(), PRNG());
               std::shuffle(records.begin(), records.end(), PRNG());
-              LOG(stderr, "Done.\n");
+              LOG(stderr, "Done; Loaded %zu keys, %zu queries and %zu records.\n", keys.size(), queries.size(), records.size());
 
               RamCloud* client = NewClient();
 
