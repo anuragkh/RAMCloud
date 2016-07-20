@@ -76,6 +76,8 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
     key_buffer.clear();
   }
 
+  delete[] keys;
+
   LOG(stderr, "Data loading complete, loaded %llu keys.\n", init_load_keys_);
   delete client;
 }
