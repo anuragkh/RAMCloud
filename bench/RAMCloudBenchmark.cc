@@ -43,10 +43,7 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
 
   int64_t cur_key = 0;
 
-  LOG(stderr, "Deleting previous table...\n");
   RamCloud* client = NewClient();
-  client->dropTable("table");
-
   LOG(stderr, "Creating table...\n");
   table_id_ = client->createTable("table");
   LOG(stderr, "Creating indexes...\n");

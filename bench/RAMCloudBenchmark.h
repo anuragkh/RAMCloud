@@ -106,7 +106,7 @@ class RAMCloudBench {
   RamCloud* NewClient() {
     char connector[256];
     sprintf(connector, "tcp:host=%s,port=11211", hostname_.c_str());
-    fprintf(stderr, "Connector: %s\n", connector);
+    fprintf(stderr, "Connecting to server; connector = %s\n", connector);
     return new RamCloud(connector, "main");
   }
 
