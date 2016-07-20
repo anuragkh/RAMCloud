@@ -1,4 +1,5 @@
 #include "RAMCloudBenchmark.h"
+#include <unistd.h>
 
 #ifdef NO_LOG
 #define LOG(out, fmt, ...)
@@ -71,6 +72,9 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes, st
   for (uint32_t i = 1; i < num_attributes_; i++)
     client->createIndex(table_id_, i, 0, 1);
 
+  sleep(10);
+
+  LOG(stderr, "Starting to load data...\n");
   auto start = high_resolution_clock::now();
   auto b_start = start;
   for (auto& record : records) {
