@@ -85,7 +85,7 @@ class RAMCloudBench {
   RamCloud* NewClient() {
     char connector[256];
     sprintf(connector, "tcp:host=%s,port=11211", hostname_.c_str());
-    return new RamCloud("tcp:host=0.0.0.0,port=11211", "main");
+    return new RamCloud(connector, "main");
   }
 
   void Search(std::vector<uint64_t>& keys, RamCloud* client,
