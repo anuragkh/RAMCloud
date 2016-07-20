@@ -21,7 +21,7 @@
     RecordData& record = records[i % records.size()];\
     KeyInfo *keys = record.GetKeys(cur_key++);\
     char* value = record.GetValue();\
-    client->write(table_id_, num_attributes_ + 1, keys, value, NULL, NULL, false);\
+    client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value), NULL, NULL, false);\
     num_keys++;\
   } else {\
     client->remove(table_id_, &keys[i % keys.size()], 8, NULL, NULL);\
@@ -30,7 +30,8 @@
 }
 #endif
 
-RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes, std::string& hostname) {
+RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
+                             std::string& hostname) {
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
   data_path_ = resolved_path;
@@ -81,8 +82,9 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes, st
     fprintf(stderr, "Writing record with key info: ");
     PrintKeyInfo(keys, num_attributes_ + 1);
     fprintf(stderr, "; value = %s\n", value);
-    client->write(table_id_, num_attributes_ + 1, keys, value, NULL, NULL,
-    false);
+    client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value),
+                  NULL, NULL,
+                  false);
 
     init_load_bytes_ += strlen(record.GetValue());
     init_load_keys_++;
@@ -233,7 +235,7 @@ void RAMCloudBench::BenchmarkAppendLatency() {
     RecordData& record = records[i];
     KeyInfo *keys = record.GetKeys(cur_key++);
     char* value = record.GetValue();
-    client->write(table_id_, num_attributes_ + 1, keys, value, NULL, NULL,
+    client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value), NULL, NULL,
     false);
   }
   LOG(stderr, "Warmup complete.\n");
