@@ -47,7 +47,7 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
   LOG(stderr, "Creating table...\n");
   table_id_ = client->createTable("table");
   LOG(stderr, "Creating indexes...\n");
-  for (uint32_t i = 1; i < num_attributes_; i++)
+  for (uint32_t i = 1; i <= num_attributes_; i++)
     client->createIndex(table_id_, i, 0, 1);
 
   LOG(stderr, "Starting to load data...\n");
