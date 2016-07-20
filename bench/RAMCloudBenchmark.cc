@@ -79,9 +79,6 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
   for (auto& record : records) {
     KeyInfo *keys = record.GetKeys(cur_key++);
     char* value = record.GetValue();
-    fprintf(stderr, "Writing record with key info: ");
-    PrintKeyInfo(keys, num_attributes_ + 1);
-    fprintf(stderr, "; value = %s\n", value);
     client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value),
                   NULL, NULL,
                   false);
@@ -319,6 +316,8 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
   std::atomic<uint64_t> cur_key;
   cur_key = init_load_keys_;
 
+  Barrier barrier(num_clients);
+
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(
         std::move(
@@ -366,13 +365,16 @@ void RAMCloudBench::BenchmarkThroughput(const double get_f,
                   std::shuffle(keys.begin(), keys.end(), PRNG());
                   std::shuffle(queries.begin(), queries.end(), PRNG());
                   std::shuffle(records.begin(), records.end(), PRNG());
-                  LOG(stderr, "Done; Loaded %zu keys, %zu queries and %zu records.\n", keys.size(), queries.size(), records.size());
+                  LOG(stderr, "Loaded %zu keys, %zu queries and %zu records.\n", keys.size(), queries.size(), records.size());
 
                   RamCloud* client = NewClient();
 
                   double query_thput = 0;
                   double key_thput = 0;
                   Buffer get_res;
+
+                  barrier.Wait();
+                  LOG(stderr, "Starting benchmark.\n");
 
                   try {
                     // Warmup phase

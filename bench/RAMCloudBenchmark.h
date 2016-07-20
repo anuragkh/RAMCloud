@@ -69,16 +69,28 @@ class RAMCloudBench {
     std::string attr_val;
   };
 
-  void PrintKeyInfo(KeyInfo* info, uint32_t n) {
-    fprintf(stderr, "[");
-    fprintf(stderr, "(%llu, %u), ", *((uint64_t*)info[0].key), info[0].keyLength);
-    for (uint32_t i = 1; i < n; i++) {
-      fprintf(stderr, "(%s, %u), ", (char*)info[i].key, info[i].keyLength);
+  class Barrier {
+   public:
+    explicit Barrier(std::size_t count)
+        : count_ { count } {
     }
-    fprintf(stderr, "]");
-  }
+    void Wait() {
+      std::unique_lock<std::mutex> lock { mutex_ };
+      if (--count_ == 0) {
+        cv_.notify_all();
+      } else {
+        cv_.wait(lock, [this] {return count_ == 0;});
+      }
+    }
 
-  RAMCloudBench(std::string& data_path, uint32_t num_attributes, std::string& hostname);
+   private:
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    std::size_t count_;
+  };
+
+  RAMCloudBench(std::string& data_path, uint32_t num_attributes,
+                std::string& hostname);
 
   // Latency benchmarks
   void BenchmarkGetLatency();
