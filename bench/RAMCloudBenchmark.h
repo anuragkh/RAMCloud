@@ -71,7 +71,8 @@ class RAMCloudBench {
 
   void PrintKeyInfo(KeyInfo* info, uint32_t n) {
     fprintf(stderr, "[");
-    for (uint32_t i = 0; i < n; i++) {
+    fprintf(stderr, "(%llu, %u), ", *((uint64_t*)info[0].key), info[0].keyLength);
+    for (uint32_t i = 1; i < n; i++) {
       fprintf(stderr, "(%s, %u), ", (char*)info[i].key, info[i].keyLength);
     }
     fprintf(stderr, "]");
