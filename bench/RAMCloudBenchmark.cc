@@ -58,17 +58,21 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
     uint64_t k = cur_key++;
     keys[0] = {&k, sizeof(uint64_t)};
     std::stringstream ss(cur_value);
-    std::string key;
+
     uint8_t key_id = 0;
-    while (std::getline(ss, key, '|') && key_id < num_attributes) {
-      char *keyptr = (char*) key.c_str();
-      KeyInfo elem = {keyptr, key.length()};
+    std::vector<std::string> key_buffer;
+    while (key_id < num_attributes) {
+      std::string key;
+      std::getline(ss, key, '|');
+      KeyInfo elem = {key.c_str(), key.length()};
       keys[key_id + 1] = elem;
       key_id++;
+      key_buffer.push_back(key);
     }
     client->write(table_id_, num_attributes_ + 1, keys, cur_value.c_str(),
         cur_value.length(), NULL, NULL, false);
     init_load_keys_++;
+    key_buffer.clear();
   }
 
   LOG(stderr, "Data loading complete, loaded %llu keys.\n", init_load_keys_);
@@ -143,7 +147,7 @@ void RAMCloudBench::BenchmarkSearchLatency() {
   std::ofstream result_stream("latency_search");
 
   // Warmup
-  LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
+  LOG(stderr, "Warming up for %llu queries...\n", warmup_count);
   for (uint64_t i = 0; i < warmup_count; i++) {
     SearchQuery& query = queries[i % queries.size()];
     std::vector<uint64_t> results;
@@ -153,7 +157,7 @@ void RAMCloudBench::BenchmarkSearchLatency() {
   LOG(stderr, "Warmup complete.\n");
 
   // Measure
-  LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
+  LOG(stderr, "Measuring for %llu queries...\n", measure_count);
   for (uint64_t i = warmup_count; i < warmup_count + measure_count; i++) {
     SearchQuery& query = queries[i % queries.size()];
     std::vector<uint64_t> results;
