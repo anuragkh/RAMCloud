@@ -80,6 +80,9 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes, st
   for (auto& record : records) {
     KeyInfo *keys = record.GetKeys(cur_key++);
     char* value = record.GetValue();
+    fprintf(stderr, "Writing record with key info: ");
+    PrintKeyInfo(keys, num_attributes_ + 1);
+    fprintf(stderr, "; value = %s\n", value);
     client->write(table_id_, num_attributes_ + 1, keys, value, NULL, NULL,
     false);
 

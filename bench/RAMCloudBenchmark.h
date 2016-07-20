@@ -69,6 +69,14 @@ class RAMCloudBench {
     std::string attr_val;
   };
 
+  void PrintKeyInfo(KeyInfo* info, uint32_t n) {
+    fprintf(stderr, "[");
+    for (uint32_t i = 0; i < n; i++) {
+      fprintf(stderr, "(%s, %u), ", (char*)info[i].key, info[i].keyLength);
+    }
+    fprintf(stderr, "]");
+  }
+
   RAMCloudBench(std::string& data_path, uint32_t num_attributes, std::string& hostname);
 
   // Latency benchmarks
