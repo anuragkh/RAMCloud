@@ -58,8 +58,8 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
   std::string cur_value;
   KeyInfo* keys = new KeyInfo[num_attributes + 1];
   while (std::getline(in, cur_value)) {
-    keys[0] = {NULL, sizeof(uint64_t)};
-
+    uint64_t k = cur_key++;
+    keys[0] = {&k, sizeof(uint64_t)};
     std::stringstream ss(cur_value);
     std::string key;
     uint8_t key_id = 0;
