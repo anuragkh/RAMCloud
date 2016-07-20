@@ -64,10 +64,11 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
     while (key_id < num_attributes) {
       std::string key;
       std::getline(ss, key, '|');
-      KeyInfo elem = {key.c_str(), key.length()};
+      key_buffer.push_back(key);
+      KeyInfo elem = {key_buffer[key_id].c_str(), key.length()};
       keys[key_id + 1] = elem;
       key_id++;
-      key_buffer.push_back(key);
+
     }
     client->write(table_id_, num_attributes_ + 1, keys, cur_value.c_str(),
         cur_value.length(), NULL, NULL, false);
@@ -135,7 +136,6 @@ void RAMCloudBench::BenchmarkSearchLatency() {
     std::stringstream ss(entry);
     ss >> attr_id >> attr_val;
     SearchQuery query = { attr_id, attr_val };
-    LOG(stderr, "Search Query: (%d, %s)\n", attr_id, attr_val.c_str());
     queries.push_back(query);
   }
 
