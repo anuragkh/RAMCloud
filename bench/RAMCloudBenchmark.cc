@@ -71,7 +71,7 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
     init_load_keys_++;
   }
 
-  LOG(stderr, "Data loading complete.\n");
+  LOG(stderr, "Data loading complete, loaded %llu keys.\n", init_load_keys_);
   delete client;
 }
 
@@ -131,6 +131,7 @@ void RAMCloudBench::BenchmarkSearchLatency() {
     std::stringstream ss(entry);
     ss >> attr_id >> attr_val;
     SearchQuery query = { attr_id, attr_val };
+    LOG(stderr, "Search Query: (%d, %s)\n", attr_id, attr_val.c_str());
     queries.push_back(query);
   }
 
