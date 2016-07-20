@@ -38,30 +38,10 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
   hostname_ = hostname;
   num_attributes_ = num_attributes;
 
-  /** Load the data
-   *  =============
-   *
-   *  We load the log store with ~250MB of data (~25% of total capacity).
-   */
-
-  const int64_t target_data_size = 250 * 1024 * 1024;
-  int64_t load_data_size = 0;
   init_load_keys_ = 0;
   uint64_t b_size = 1000;
-  init_load_bytes_ = 0;
 
   int64_t cur_key = 0;
-
-  LOG(stderr, "Reading data...\n");
-  std::ifstream in(data_path);
-  std::vector<RecordData> records;
-  while (load_data_size < target_data_size) {
-    std::string cur_value;
-    std::getline(in, cur_value);
-    RecordData record(cur_value, num_attributes_);
-    records.push_back(record);
-    load_data_size += cur_value.length();
-  }
 
   LOG(stderr, "Deleting previous table...\n");
   RamCloud* client = NewClient();
@@ -74,41 +54,27 @@ RAMCloudBench::RAMCloudBench(std::string& data_path, uint32_t num_attributes,
     client->createIndex(table_id_, i, 0, 1);
 
   LOG(stderr, "Starting to load data...\n");
-  auto start = high_resolution_clock::now();
-  auto b_start = start;
-  for (auto& record : records) {
-    KeyInfo *keys = record.GetKeys(cur_key++);
-    char* value = record.GetValue();
-    client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value),
-                  NULL, NULL,
-                  false);
+  std::ifstream in(data_path);
+  std::string cur_value;
+  KeyInfo* keys = new KeyInfo[num_attributes + 1];
+  while (std::getline(in, cur_value)) {
+    keys[0] = {NULL, sizeof(uint64_t)};
 
-    init_load_bytes_ += strlen(record.GetValue());
-    init_load_keys_++;
-
-    // Periodically print out statistics
-    if (init_load_keys_ % b_size == 0) {
-      auto b_end = high_resolution_clock::now();
-      auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
-      double avg_latency = (double) elapsed_us / (double) b_size;
-      double completion = 100.0 * (double) (init_load_bytes_)
-          / (double) (target_data_size);
-      LOG(stderr,
-          "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
-          completion, init_load_bytes_, avg_latency);
-      b_start = high_resolution_clock::now();
+    std::stringstream ss(cur_value);
+    std::string key;
+    uint8_t key_id = 0;
+    while (std::getline(ss, key, '|') && key_id < num_attributes) {
+      char *keyptr = (char*) key.c_str();
+      KeyInfo elem = {keyptr, key.length()};
+      keys[key_id + 1] = elem;
+      key_id++;
     }
+    client->write(table_id_, num_attributes_ + 1, keys, cur_value.c_str(),
+        cur_value.length(), NULL, NULL, false);
+    init_load_keys_++;
   }
 
-  // Print end of load statistics
-  auto end = high_resolution_clock::now();
-  auto elapsed_us = duration_cast<nanoseconds>(end - start).count();
-  double avg_latency = (double) elapsed_us / (double) init_load_keys_;
-
-  LOG(stderr,
-      "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
-      init_load_keys_, init_load_bytes_, avg_latency);
-
+  LOG(stderr, "Data loading complete.\n");
   delete client;
 }
 
@@ -232,8 +198,10 @@ void RAMCloudBench::BenchmarkAppendLatency() {
     RecordData& record = records[i];
     KeyInfo *keys = record.GetKeys(cur_key++);
     char* value = record.GetValue();
-    client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value), NULL, NULL,
-    false);
+    client->write(table_id_, num_attributes_ + 1, keys, value, strlen(value),
+    NULL,
+                  NULL,
+                  false);
   }
   LOG(stderr, "Warmup complete.\n");
 

@@ -23,8 +23,8 @@ class RAMCloudBench {
   typedef unsigned long long int TimeStamp;
 
   static const uint64_t kWarmupCount = 1000;
-  static const uint64_t kMeasureCount = 74000;
-  static const uint64_t kCooldownCount = 10000;
+  static const uint64_t kMeasureCount = 10000;
+  static const uint64_t kCooldownCount = 1000;
 
   static const uint64_t kWarmupTime = 50000000;
   static const uint64_t kMeasureTime = 100000000;
@@ -162,7 +162,6 @@ class RAMCloudBench {
   std::string data_path_;
   std::string hostname_;
   uint8_t num_attributes_;
-  uint64_t init_load_bytes_;
   uint64_t init_load_keys_;
   uint64_t table_id_;
 };
