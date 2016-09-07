@@ -1,5 +1,4 @@
 #include "RAMCloudBenchmark.h"
-#include <unistd.h>
 
 #ifdef NO_LOG
 #define LOG(out, fmt, ...)
