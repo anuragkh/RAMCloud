@@ -123,7 +123,7 @@ std::vector<std::string> Split(const std::string &s, char delim) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 2 || argc > 10) {
+  if (argc < 3 || argc > 7) {
     PrintUsage(argv[0]);
     return -1;
   }
@@ -134,12 +134,6 @@ int main(int argc, char** argv) {
   uint8_t num_attributes = 1;
   while ((c = getopt(argc, argv, "b:n:a:h:")) != -1) {
     switch (c) {
-      case 'b':
-        bench_type = std::string(optarg);
-        break;
-      case 'a':
-        num_attributes = atoi(optarg);
-        break;
       case 'n':
         num_clients = atoi(optarg);
         break;
@@ -157,33 +151,10 @@ int main(int argc, char** argv) {
   }
 
   std::string data_path = std::string(argv[optind]);
+  std::string attr_path = std::string(argv[optind + 1]);
 
-  RAMCloudBench bench(data_path, num_attributes, hostname);
-  if (bench_type == "latency-get") {
-    bench.BenchmarkGetLatency();
-  } else if (bench_type == "latency-search") {
-    bench.BenchmarkSearchLatency();
-  } else if (bench_type == "latency-append") {
-    bench.BenchmarkAppendLatency();
-  } else if (bench_type == "latency-delete") {
-    bench.BenchmarkDeleteLatency();
-  } else if (bench_type.find("throughput") == 0) {
-    std::vector<std::string> tokens = Split(bench_type, '-');
-    if (tokens.size() != 5) {
-      LOG(stderr, "Error: Incorrect throughput benchmark format.\n");
-      return -1;
-    }
-    double get_f = atof(tokens[1].c_str());
-    double search_f = atof(tokens[2].c_str());
-    double append_f = atof(tokens[3].c_str());
-    double delete_f = atof(tokens[4].c_str());
-    LOG(stderr,
-        "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, delete_f = %.2lf, num_clients = %d\n",
-        get_f, search_f, append_f, delete_f, num_clients);
-    bench.BenchmarkThroughput(get_f, search_f, append_f, delete_f, num_clients);
-  } else {
-    LOG(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
-  }
+  PacketLoader loader(data_path, attr_path, hostname);
+  loader.LoadPackets(num_clients);
 
   return 0;
 }
