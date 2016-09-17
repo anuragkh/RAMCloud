@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
   char* data_path = argv[optind];
 
   char connector[256];
-  sprintf(connector, "tcp:host=%s,port=11211", hostname);
+  sprintf(connector, "tcp:host=%s,port=11211", hostname.c_str());
   fprintf(stderr, "Connecting to server; connector = %s\n", connector);
   RamCloud* client = new RamCloud(connector, "main");
 
