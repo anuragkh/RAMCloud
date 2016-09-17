@@ -34,6 +34,9 @@ void PacketLoader::LoadData() {
   std::ifstream ind(data_path_);
   std::ifstream ina(attr_path_);
   std::string attr_line;
+  LOG(stderr, "Reading from path data=%s, attr=%s\n", data_path_.c_str(),
+      attr_path_.c_str());
+
   while (std::getline(ina, attr_line)) {
     std::stringstream attr_stream(attr_line);
     std::string ts, srcip, dstip, sport, dport;
@@ -49,6 +52,8 @@ void PacketLoader::LoadData() {
     datas_.push_back(data);
     datalens_.push_back(len);
   }
+
+  LOG(stderr, "Loaded %zu packets.\n", datas_.size());
 }
 
 void PacketLoader::LoadPackets(const uint32_t num_clients) {
@@ -102,8 +107,7 @@ void PacketLoader::LoadPackets(const uint32_t num_clients) {
 }
 
 void PrintUsage(char *exec) {
-  LOG(stderr,
-      "Usage: %s [-b bench-type] [-m mode] [-n num-clients] data-path\n", exec);
+  LOG(stderr, "Usage: %s -h [hostname] -n [numthreads] [data] [attrs]\n", exec);
 }
 
 std::vector<std::string> &Split(const std::string &s, char delim,
