@@ -11,7 +11,9 @@ PacketLoader::PacketLoader(std::string& data_path, std::string& attr_path,
                            std::string& hostname) {
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
-  data_path_ = resolved_path;
+  data_path_ = std::string(resolved_path);
+  realpath(attr_path.c_str(), resolved_path);
+  attr_path_ = std::string(resolved_path);
   hostname_ = hostname;
 
   RamCloud* client = NewClient();

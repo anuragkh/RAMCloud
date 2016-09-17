@@ -26,7 +26,7 @@ class PacketLoader {
   int64_t InsertPacket(RamCloud* client) {
 
     uint64_t cur_id = id.fetch_add(1L);
-    if (cur_id < timestamps_.size()) {
+    if (cur_id >= timestamps_.size()) {
       return -1L;
     }
 
