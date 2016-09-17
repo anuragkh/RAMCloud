@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
   while ((c = getopt(argc, argv, "t:n:h:")) != -1) {
     switch (c) {
       case 't':
-        timebound = atol(optarg) * 10e6;
+        timebound = atol(optarg) * 1000000;
         break;
       case 'n':
         num_clients = atoi(optarg);
