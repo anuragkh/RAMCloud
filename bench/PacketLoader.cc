@@ -58,7 +58,7 @@ void PacketLoader::LoadData() {
   LOG(stderr, "Loaded %zu packets.\n", datas_.size());
 }
 
-void PacketLoader::LoadPackets(const uint32_t num_clients) {
+void PacketLoader::LoadPackets(const uint32_t num_clients, const uint64_t timebound) {
 
   std::condition_variable cvar;
   std::vector<std::thread> threads;
@@ -83,7 +83,7 @@ void PacketLoader::LoadPackets(const uint32_t num_clients) {
         int64_t total_ops = 0;
 
         TimeStamp start = GetTimestamp();
-        while (total_ops >= 0) {
+        while (total_ops >= 0 && GetTimestamp() - start < timebound) {
           total_ops = InsertPacket(client);
           local_ops += (total_ops > 0);
           if (total_ops % kReportRecordInterval == 0) {
@@ -145,8 +145,12 @@ int main(int argc, char** argv) {
   std::string bench_type = "latency-get", hostname = "localhost";
   int num_clients = 1;
   uint8_t num_attributes = 1;
-  while ((c = getopt(argc, argv, "b:n:a:h:")) != -1) {
+  uint64_t timebound = UINT64_MAX;
+  while ((c = getopt(argc, argv, "t:n:h:")) != -1) {
     switch (c) {
+      case 'n':
+        timebound = atol(optarg) * 10e6;
+        break;
       case 'n':
         num_clients = atoi(optarg);
         break;
@@ -167,7 +171,7 @@ int main(int argc, char** argv) {
   std::string attr_path = std::string(argv[optind + 1]);
 
   PacketLoader loader(data_path, attr_path, hostname);
-  loader.LoadPackets(num_clients);
+  loader.LoadPackets(num_clients, timebound);
 
   return 0;
 }

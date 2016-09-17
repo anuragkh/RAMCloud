@@ -69,7 +69,7 @@ class PacketLoader {
   void LoadData();
 
   // Throughput benchmarks
-  void LoadPackets(const uint32_t num_clients = 1);
+  void LoadPackets(const uint32_t num_clients, const uint64_t timebound);
 
   RamCloud* NewClient() {
     char connector[256];
