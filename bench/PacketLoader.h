@@ -21,7 +21,7 @@ using namespace ::std::chrono;
 class PacketLoader {
  public:
   typedef unsigned long long int TimeStamp;
-  static const uint64_t kMeasureTime = 30000000;
+  static const uint64_t kReportRecordInterval = 10000;
 
   int64_t InsertPacket(RamCloud* client) {
 

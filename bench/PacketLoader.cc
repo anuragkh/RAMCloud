@@ -65,6 +65,10 @@ void PacketLoader::LoadPackets(const uint32_t num_clients) {
 
   Barrier barrier(num_clients);
 
+  std::ofstream rfs;
+  rfs.open("record_progress");
+
+  std::mutex report_mtx;
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(std::move(std::thread([&] {
       RamCloud* client = NewClient();
@@ -82,6 +86,10 @@ void PacketLoader::LoadPackets(const uint32_t num_clients) {
         while (total_ops >= 0) {
           total_ops = InsertPacket(client);
           local_ops += (total_ops > 0);
+          if (total_ops % kReportRecordInterval == 0) {
+            std::lock_guard<std::mutex> lock(report_mtx);
+            rfs << GetTimestamp() << "\t" << total_ops << "\n";
+          }
         }
         TimeStamp end = GetTimestamp();
         double totsecs = (double) (end - start) / (1000.0 * 1000.0);
@@ -94,8 +102,7 @@ void PacketLoader::LoadPackets(const uint32_t num_clients) {
 
       std::ofstream ofs;
       char output_file[100];
-      sprintf(output_file, "write_throughput.txt");
-      ofs.open(output_file, std::ofstream::out | std::ofstream::app);
+      ofs.open("write_throughput.txt", std::ofstream::out | std::ofstream::app);
       ofs << throughput << "\n";
       ofs.close();
       delete client;
