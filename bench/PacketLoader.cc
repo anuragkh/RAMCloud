@@ -136,7 +136,7 @@ std::vector<std::string> Split(const std::string &s, char delim) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 7) {
+  if (argc < 3 || argc > 9) {
     PrintUsage(argv[0]);
     return -1;
   }
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
   uint64_t timebound = UINT64_MAX;
   while ((c = getopt(argc, argv, "t:n:h:")) != -1) {
     switch (c) {
-      case 'n':
+      case 't':
         timebound = atol(optarg) * 10e6;
         break;
       case 'n':
